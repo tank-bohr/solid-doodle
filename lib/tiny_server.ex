@@ -37,7 +37,8 @@ defmodule TinyServer do
     new_state = receive do
       {:call, from, request} ->
         handle_call(module, request, from, state)
-
+      {:cast, request} ->
+        handle_cast(module, request, state)
       message ->
         IO.inspect("Tiny server got " <> inspect(message))
         state
@@ -64,7 +65,10 @@ defmodule TinyServer do
     send(pid, {tag, response})
   end
 
-  def cast do
+  def cast(pid, request) do
+    send(pid, {:cast, request})
+
+    :ok
   end
 
   def stop do
@@ -78,6 +82,13 @@ defmodule TinyServer do
 
       {:noreply, new_state} ->
         new_state
+    end
+  end
+
+  def handle_cast(module, request, state) do
+    case module.handle_cast(request, state) do
+      {:noreply, new_state} -> new_state
+      _ -> raise("Invalid response")
     end
   end
 end
