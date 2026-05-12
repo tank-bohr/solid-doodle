@@ -12,4 +12,8 @@ defmodule TinyServer.CallbackModule do
   def init(args) do
     {:ok, args}
   end
+
+  def handle_call(:sync, _from, state) do
+    {:reply, "this is a sync reply", state}
+  end
 end
